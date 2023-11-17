@@ -1,0 +1,131 @@
+' 宣告變數名稱
+Integer Tokens
+Integer Blocks
+Integer TokenID
+Integer BlockID
+Double TokenHeight
+Double BlockHeight
+
+Function main
+	
+' 參數設定
+Motor On
+Power High
+Speed 30
+Accel 30, 30
+SpeedS 500
+AccelS 5000
+Tool 1
+
+Tokens = 2 ' 0 1 2
+Blocks = 2
+TokenHeight = 6.0 ' 6mm
+BlockHeight = 6.0
+
+Go Safe_Point ' 去安全點位
+
+
+' 抓取 Tokens (圓形)
+'For TokenID = Tokens To 0 Step -1 ' To 0 Step -1 甚麼意思
+'	Pick_Infeed_Token()
+' 	Alignment_Token()
+' 	Place_Tray_Token()
+'Next TokenID
+
+' 抓取 Blocks (方形)
+For BlockID = Blocks To 0 Step -1
+	Pick_Infeed_Block()
+	Alignment_Block()
+	Place_Tray_Block()
+Next BlockID
+
+Go Safe_Point ' 去安全點位
+' Go P0 ' 回原點座標
+
+Fend
+
+Function Pick_Infeed_Token ' Infeed_Token: 一個Token在取料版上的位置
+	'Pick Token from Infeed
+	Print "Picking Token from Infeed. Token ID = ", Tokens
+	Go Infeed_Token +Z(50 + (Tokens * TokenHeight)) CP ' 手臂到Token取料板上面
+	Move Infeed_Token +Z(Tokens * TokenHeight) ' 手臂下去吸取Token
+	On 8 ' 開起泵浦
+	Wait .5 ' 等待時間
+	Move Infeed_Token +X(-1) +Z(50 + (Tokens * TokenHeight)) CP ' 吸取完後，手臂往後跟往上退出
+	'Tokens = Tokens - 1
+Fend
+
+Function Alignment_Token ' Alignment_Token: 一個Token在校正版上的位置
+	'Alignment Token
+	Print "Aligning Token. Token ID = ", Tokens
+	Go Align_Token +Z(20) CP ' 手臂到Token校正板上面
+	Move Align_Token ' 手臂下去放置Token
+	Off 8 ' 關閉泵浦
+	Move Align_Token +X(5) ' 手臂離開Token
+	Move Align_Token +X(5) +Z(5) CP ' 手臂離開Token
+	Go Align_Token +Z(5) CP ' 手臂回到Token上面
+	Move Align_Token ' 手臂下去吸取Token
+	On 8 ' 開起泵浦
+	Wait .5 ' 等待時間
+	Move Align_Token +Z(20) CP ' 吸取完後，手臂往上退出
+Fend
+
+Function Place_Tray_Token ' Tray_Token: 一個Token在放置版上的位置
+	'Tray Token
+	Print "Placing Token in Tray. Tray Position ID = ", Tokens
+	Go Tray_Token +Y(30. * Tokens) +Z(50) CP ' 手臂到Token放置板上面
+	Move Tray_Token +Y(30. * Tokens) ' ' 手臂下去放置Token
+	Off 8 ' 關閉泵浦
+	Wait .5 ' 等待時間
+	Move Tray_Token +Y(30. * Tokens) +Z(50) CP ' 放置完後，手臂往上退出
+	Tokens = Tokens - 1 ' Token數量減一
+Fend
+
+Function Pick_Infeed_Block
+	'Pick Block from Infeed
+	Print "Picking Block from Infeed. Block ID = ", Blocks
+	Go Infeed_Block +Z(50 + (Blocks * BlockHeight)) CP
+	Move Infeed_Block +Z(Blocks * BlockHeight)
+	On 8
+	Wait .5
+	Move Infeed_Block +Z(1 + (Blocks * BlockHeight))
+	Move Infeed_Block +X(-1) +Y(1) +Z(49 + (Blocks * BlockHeight)) CP
+	'Blocks = Blocks - 1
+Fend
+
+Function Alignment_Block
+	'Alignment Block
+	Print "Aligning Block. Block ID = ", Blocks
+	Go Align_Block +Z(50) CP
+	Move Align_Block
+	Off 8
+	Move Align_Block +X(2) +Y(-6)
+	'Move Align_Block +X(5) CP
+	Move Align_Block +X(2) +Y(-6) +Z(5) CP
+	Go Align_Block +Z(5) CP
+	Move Align_Block
+	On 8
+	Wait .5
+	Move Align_Block +Z(20) CP
+Fend
+
+Function Place_Tray_Block
+	'Tray Block
+	Print "Placing Block in Tray. Block Position ID = ", Blocks
+	Go Rotate_Block +Y(30. * Blocks) CP
+	Move Rotate_Block +Y(30. * Blocks) -Z(50)
+	Move Rotate_Block +U(90)
+	Off 8
+	Wait .5
+	Move Rotate_Block +Y(30. * Blocks) CP
+	Blocks = Blocks - 1
+Fend
+
+' Go: Moves the robot to a point using point to point motion.
+' Move: Moves the robot using linear interpolation.
+' CP: Sets CP (Continuous Path) motion mode.
+' Wait: Wait for condition or time.
+
+
+
+
